@@ -37,6 +37,31 @@ public class PoolCueBehavior : MonoBehaviour
     void Update()
     {
         Movement(new Vector2(Input.GetAxis("Vertical"), Input.GetAxis("Horizontal")), Input.GetAxis("SlowRotation") != 0, Input.GetAxis("SlowMovement") != 0);
+
+        if (Input.GetAxis("Hit") != 0)
+        {
+            Ray mouseRay = Camera.main.ScreenPointToRay(transform.forward);
+            Plane playerPlane = new Plane(Vector3.up, transform.position);
+
+            float rayDistance = 0;
+
+            playerPlane.Raycast(mouseRay, out rayDistance);
+
+            Vector3 targetPoint = mouseRay.GetPoint(rayDistance);
+
+            Vector3 fireDirection = targetPoint - transform.position;
+
+            fireDirection.Normalize();
+
+            Ray fireRay = new Ray(transform.position, fireDirection);
+
+            RaycastHit objectHitInfo;
+            if (Physics.Raycast(fireRay, out objectHitInfo))
+            {
+                if (objectHitInfo.collider.gameObject.tag == "PoolCue") return;
+                Destroy(objectHitInfo.collider.gameObject);
+            }
+        }
     }
 
     private void Movement(Vector2 movement, bool slowRotation, bool slowMovement)
