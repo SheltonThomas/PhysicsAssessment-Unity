@@ -4,26 +4,57 @@ using UnityEngine;
 
 public class CameraBehavior : MonoBehaviour
 {
-    public Transform target;
-    [HideInInspector]
-    public Vector3 offset;
+    [SerializeField]
+    private Transform regularGimbal;
+    [SerializeField]
+    private Transform skyGimbal;
+    private Gimbal currentGimbal = 0;
+    [SerializeField]
+    private float lerpSpeed;
+
     private Vector3 distance;
 
-    public float speed;
-
-    // Start is called before the first frame update
-    void Start()
+    public enum Gimbal
     {
-        distance = transform.position - target.position;
+        regular,
+        sky
+    }
+
+    private void Start()
+    {
+        currentGimbal = Gimbal.regular;
+        distance = transform.position - regularGimbal.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 targetPosition = target.position + distance + offset;
-        //transform.position = targetPosition;
+        Vector3 zeroVector = new Vector3(0, 0, 0);
+        if (currentGimbal == Gimbal.regular && transform.localPosition != zeroVector)
+        {
+            transform.position = Vector3.Lerp(transform.position + distance, regularGimbal.position, lerpSpeed * Time.deltaTime);
+            transform.forward = regularGimbal.forward;
+        }
+        if(currentGimbal == Gimbal.sky && transform.localPosition != zeroVector)
+        {
+            transform.position = Vector3.Lerp(transform.position, skyGimbal.position, lerpSpeed * Time.deltaTime);
+            transform.forward = skyGimbal.forward;
+        }
 
-        transform.position = Vector3.Lerp(transform.position, targetPosition, speed * Time.deltaTime);
-        transform.forward = Vector3.Lerp(transform.forward, target.forward, speed * Time.deltaTime);
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (currentGimbal == Gimbal.regular)
+            {
+                currentGimbal++;
+                transform.parent = skyGimbal;
+            }
+            else if (currentGimbal == Gimbal.sky)
+            {
+                currentGimbal--;
+                transform.parent = regularGimbal;
+            }
+        }
     }
+
+    public Gimbal CurrentGimbal => currentGimbal;
 }

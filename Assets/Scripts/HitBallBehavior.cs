@@ -25,7 +25,5 @@ public class HitBallBehavior : MonoBehaviour
         float forceToApply = hitForce * movementScale;
 
         otherRB.AddForce(transform.forward * forceToApply, ForceMode.Impulse);
-
-        Debug.Log("Hit");
     }
 }
